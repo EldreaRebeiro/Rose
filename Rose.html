@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Rose Day 🌹</title>
+  <style>
+    :root{
+      --blue:#2d6cdf;
+      --sage:#7fa993;
+      --sage2:#cfe2d7;
+      --peach:#ffd1c8;
+      --rose:#ff6b9a;
+      --ink:#203040;
+      --card: rgba(255,255,255,.78);
+      --shadow: 0 20px 60px rgba(17, 35, 55, .18);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--ink);
+      overflow:hidden;
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(255,209,200,.65), transparent 60%),
+        radial-gradient(900px 600px at 80% 0%, rgba(127,169,147,.45), transparent 60%),
+        radial-gradient(900px 700px at 80% 100%, rgba(45,108,223,.18), transparent 55%),
+        linear-gradient(180deg, #fff7f6, #f6fbf8);
+    }
+
+    /* --- Decorative background leaves/flowers --- */
+    .bg{
+      position:fixed; inset:0;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    .blob{
+      position:absolute;
+      opacity:.95;
+      transform: rotate(var(--r));
+      animation: floaty 7s ease-in-out infinite;
+    }
+    .leaf{
+      width:220px; height:220px;
+      left:var(--x); top:var(--y);
+      background:
+        radial-gradient(closest-side at 30% 30%, rgba(255,255,255,.7), transparent 65%),
+        radial-gradient(closest-side at 70% 70%, rgba(255,255,255,.35), transparent 65%),
+        linear-gradient(135deg, rgba(127,169,147,.85), rgba(207,226,215,.45));
+      border-radius: 80% 20% 70% 30% / 60% 40% 60% 40%;
+      box-shadow: 0 18px 40px rgba(32,48,64,.08);
+    }
+    .leaf::after{
+      content:"";
+      position:absolute; inset:18% 12%;
+      border-radius: 80% 20% 70% 30% / 60% 40% 60% 40%;
+      background: linear-gradient(135deg, rgba(255,255,255,.35), transparent 55%);
+      opacity:.75;
+    }
+
+    .flower{
+      width:170px; height:170px;
+      left:var(--x); top:var(--y);
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,.85) 0 16px, transparent 17px),
+        radial-gradient(circle at 50% 50%, rgba(255,107,154,.35) 0 45px, transparent 46px),
+        conic-gradient(from 0deg,
+          rgba(255,209,200,.85),
+          rgba(255,107,154,.45),
+          rgba(127,169,147,.55),
+          rgba(45,108,223,.22),
+          rgba(255,209,200,.85));
+      border-radius: 50%;
+      box-shadow: 0 20px 60px rgba(32,48,64,.10);
+      opacity:.65;
+    }
+
+    /* --- Card --- */
+    .wrap{
+      position:relative;
+      min-height:100%;
+      display:grid;
+      place-items:center;
+      padding: 24px;
+    }
+
+    .card{
+      width:min(520px, 92vw);
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.55);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 24px 20px 18px;
+      text-align:center;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(127,169,147,.18);
+      border: 1px solid rgba(127,169,147,.22);
+      font-weight: 600;
+      letter-spacing: .2px;
+      color: #1f3b2c;
+    }
+
+    h1{
+      margin: 14px 0 6px;
+      font-size: clamp(26px, 4.3vw, 40px);
+      line-height:1.05;
+      color: #17304f;
+      text-shadow: 0 6px 20px rgba(45,108,223,.10);
+    }
+    .sub{
+      margin: 0 auto 18px;
+      max-width: 44ch;
+      font-size: 15.5px;
+      opacity:.85;
+    }
+
+    .btn{
+      appearance:none;
+      border: none;
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 16px;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: .2px;
+      cursor:pointer;
+      color: white;
+      background: linear-gradient(135deg, rgba(45,108,223,.95), rgba(127,169,147,.85));
+      box-shadow: 0 14px 34px rgba(45,108,223,.22);
+      transition: transform .12s ease, filter .12s ease;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:active{ transform: scale(.98); filter: brightness(.98); }
+
+    .hint{
+      margin: 10px 0 0;
+      font-size: 13px;
+      opacity:.72;
+    }
+
+    /* --- Bouquet popup --- */
+    .bouquet{
+      position:fixed;
+      left:50%; top:52%;
+      transform: translate(-50%,-50%) scale(.6);
+      width: min(420px, 86vw);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .25s ease, transform .25s ease;
+      z-index: 5;
+    }
+    .bouquet.show{
+      opacity:1;
+      transform: translate(-50%,-50%) scale(1);
+      pointer-events:auto;
+    }
+
+    .bouquetCard{
+      background: rgba(255,255,255,.82);
+      border: 1px solid rgba(255,255,255,.6);
+      border-radius: 24px;
+      box-shadow: 0 26px 70px rgba(17, 35, 55, .22);
+      padding: 18px 16px 14px;
+      position:relative;
+      overflow:hidden;
+    }
+    .bouquetCard::before{
+      content:"";
+      position:absolute; inset:-40%;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,209,200,.7), transparent 45%),
+        radial-gradient(circle at 70% 55%, rgba(127,169,147,.45), transparent 50%),
+        radial-gradient(circle at 70% 20%, rgba(45,108,223,.18), transparent 52%);
+      transform: rotate(18deg);
+      opacity:.9;
+    }
+
+    .bouquetTop{
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+    .bouquetTop h2{
+      margin:0;
+      font-size: 18px;
+      letter-spacing:.2px;
+      color:#17304f;
+    }
+
+    .close{
+      border:none;
+      background: rgba(45,108,223,.10);
+      color:#17304f;
+      font-weight:800;
+      padding: 8px 12px;
+      border-radius: 999px;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .art{
+      position:relative;
+      display:grid;
+      place-items:center;
+      padding: 10px 4px 2px;
+    }
+
+    .wrapPaper{
+      width: 280px; height: 170px;
+      background: linear-gradient(135deg, rgba(255,209,200,.9), rgba(255,255,255,.55));
+      border: 1px solid rgba(255,255,255,.6);
+      border-radius: 26px;
+      transform: rotate(-6deg);
+      position:absolute;
+      bottom: 8px;
+      box-shadow: 0 16px 36px rgba(32,48,64,.12);
+    }
+    .wrapPaper::after{
+      content:"";
+      position:absolute; inset: 14px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(127,169,147,.25), transparent 55%);
+      opacity:.7;
+    }
+
+    .ribbon{
+      width: 120px; height: 34px;
+      position:absolute;
+      bottom: 30px;
+      left:50%;
+      transform: translateX(-50%) rotate(-6deg);
+      background: linear-gradient(135deg, rgba(45,108,223,.9), rgba(255,107,154,.75));
+      border-radius: 999px;
+      box-shadow: 0 10px 20px rgba(45,108,223,.18);
+    }
+    .ribbon::before, .ribbon::after{
+      content:"";
+      position:absolute; top:50%;
+      width: 46px; height: 22px;
+      background: inherit;
+      border-radius: 999px;
+      transform: translateY(-50%);
+      opacity:.95;
+    }
+    .ribbon::before{ left:-26px; transform: translateY(-50%) rotate(18deg); }
+    .ribbon::after{ right:-26px; transform: translateY(-50%) rotate(-18deg); }
+
+    .roses{
+      position:relative;
+      width: 300px;
+      height: 210px;
+      display:block;
+      margin-top: 8px;
+      filter: drop-shadow(0 18px 26px rgba(32,48,64,.14));
+    }
+
+    .msg{
+      position:relative;
+      margin: 10px 0 2px;
+      font-size: 14px;
+      opacity:.85;
+    }
+
+    /* --- Petals / confetti --- */
+    .fxLayer{
+      position:fixed; inset:0;
+      pointer-events:none;
+      z-index: 6;
+      overflow:hidden;
+    }
+    .petal{
+      position:absolute;
+      width: 12px; height: 10px;
+      border-radius: 60% 40% 60% 40% / 60% 40% 60% 40%;
+      background: linear-gradient(135deg, rgba(255,107,154,.95), rgba(255,209,200,.85));
+      opacity:.92;
+      transform: translate(-50%,-50%);
+      animation: fall var(--dur) linear forwards;
+    }
+    .petal.sage{
+      background: linear-gradient(135deg, rgba(127,169,147,.9), rgba(207,226,215,.85));
+      opacity:.85;
+    }
+    .petal.blue{
+      background: linear-gradient(135deg, rgba(45,108,223,.85), rgba(127,169,147,.55));
+      opacity:.8;
+    }
+
+    @keyframes fall{
+      0%{ transform: translate(var(--x0), var(--y0)) rotate(0deg); }
+      100%{ transform: translate(var(--x1), var(--y1)) rotate(540deg); opacity:0; }
+    }
+    @keyframes floaty{
+      0%,100%{ transform: translateY(0) rotate(var(--r)); }
+      50%{ transform: translateY(-10px) rotate(var(--r)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg" aria-hidden="true">
+    <div class="blob leaf"   style="--x:-40px; --y:-30px; --r:-18deg;"></div>
+    <div class="blob flower" style="--x: calc(100% - 170px); --y: -40px; --r: 10deg;"></div>
+    <div class="blob leaf"   style="--x: calc(100% - 210px); --y: calc(100% - 230px); --r: 24deg;"></div>
+    <div class="blob flower" style="--x: -55px; --y: calc(100% - 170px); --r: -6deg;"></div>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="badge">🌿🌸 Rose Day</div>
+      <h1>Happy Rose Day 🌹</h1>
+      <p class="sub">Tap the heart to see a bouquet of red roses bloom.</p>
+
+      <button class="btn" id="heartBtn">
+        <span style="font-size:18px">💙</span>
+        <span>Tap the Heart</span>
+        <span style="font-size:18px">💚</span>
+      </button>
+
+      <div class="hint">Tap again for more petals ✨</div>
+    </div>
+  </div>
+
+  <div class="bouquet" id="bouquet" role="dialog" aria-modal="true" aria-label="Rose bouquet popup">
+    <div class="bouquetCard">
+      <div class="bouquetTop">
+        <h2>For you 💐</h2>
+        <button class="close" id="closeBtn">Close</button>
+      </div>
+
+      <div class="art">
+        <svg class="roses" viewBox="0 0 520 360" xmlns="http://www.w3.org/2000/svg">
+          <!-- stems -->
+          <path d="M165 310 C165 240, 180 220, 200 190" stroke="rgba(127,169,147,.95)" stroke-width="8" fill="none" stroke-linecap="round"/>
+          <path d="M260 315 C260 245, 270 230, 288 200" stroke="rgba(127,169,147,.95)" stroke-width="8" fill="none" stroke-linecap="round"/>
+          <path d="M350 310 C350 245, 340 225, 320 195" stroke="rgba(127,169,147,.95)" stroke-width="8" fill="none" stroke-linecap="round"/>
+
+          <!-- leaves -->
+          <path d="M190 255 C160 250, 145 235, 135 210 C160 215, 185 230, 190 255Z" fill="rgba(207,226,215,.95)"/>
+          <path d="M290 250 C325 245, 350 228, 365 205 C338 212, 300 228, 290 250Z" fill="rgba(207,226,215,.95)"/>
+          <path d="M250 270 C220 268, 205 255, 195 235 C220 240, 245 252, 250 270Z" fill="rgba(207,226,215,.85)"/>
+
+          <!-- RED ROSE 1 -->
+          <g transform="translate(200 165)">
+            <circle r="42" fill="#7a0c1a"/>
+            <path d="M-34 0 C-26 -26, 10 -34, 22 -16 C36 6, 16 26, 0 34 C-18 42,-40 28,-34 0Z"
+                  fill="#b11226"/>
+            <path d="M-10 -26 C0 -40, 26 -32, 22 -10 C18 14,-6 18,-14 2 C-22 -12,-20 -18,-10 -26Z"
+                  fill="#e63946"/>
+            <circle r="9" fill="#5a0b14"/>
+          </g>
+
+          <!-- RED ROSE 2 -->
+          <g transform="translate(290 175)">
+            <circle r="44" fill="#7a0c1a"/>
+            <path d="M-36 2 C-28 -24, 12 -36, 26 -14 C40 8, 18 30, 2 36 C-18 44,-44 30,-36 2Z"
+                  fill="#b11226"/>
+            <path d="M-10 -28 C2 -44, 30 -34, 24 -8 C20 18,-8 20,-16 2 C-24 -14,-22 -20,-10 -28Z"
+                  fill="#e63946"/>
+            <circle r="10" fill="#5a0b14"/>
+          </g>
+
+          <!-- RED ROSE 3 -->
+          <g transform="translate(320 160)">
+            <circle r="40" fill="#7a0c1a"/>
+            <path d="M-32 0 C-24 -24, 10 -32, 22 -14 C34 6, 16 24, 0 30 C-16 38,-38 26,-32 0Z"
+                  fill="#b11226"/>
+            <path d="M-10 -24 C0 -38, 24 -30, 20 -8 C16 14,-6 16,-14 2 C-20 -10,-18 -16,-10 -24Z"
+                  fill="#e63946"/>
+            <circle r="9" fill="#5a0b14"/>
+          </g>
+        </svg>
+
+        <div class="wrapPaper"></div>
+        <div class="ribbon"></div>
+      </div>
+
+      <div class="msg">Happy Rose Day 🌹</div>
+    </div>
+  </div>
+
+  <div class="fxLayer" id="fx"></div>
+
+  <script>
+    const heartBtn = document.getElementById('heartBtn');
+    const bouquet = document.getElementById('bouquet');
+    const closeBtn = document.getElementById('closeBtn');
+    const fx = document.getElementById('fx');
+
+    function burstPetals(count=42){
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      for(let i=0;i<count;i++){
+        const p = document.createElement('div');
+        p.className = 'petal';
+
+        const r = Math.random();
+        if(r < 0.22) p.classList.add('blue');
+        else if(r < 0.45) p.classList.add('sage');
+
+        const startX = Math.random() * w;
+        const startY = -20 - Math.random()*80;
+
+        const endX = startX + (Math.random()*240 - 120);
+        const endY = h + 60 + Math.random()*140;
+
+        const dur = 2.6 + Math.random()*1.8;
+
+        p.style.setProperty('--x0', `${startX}px`);
+        p.style.setProperty('--y0', `${startY}px`);
+        p.style.setProperty('--x1', `${endX}px`);
+        p.style.setProperty('--y1', `${endY}px`);
+        p.style.setProperty('--dur', `${dur}s`);
+
+        p.style.left = '0px';
+        p.style.top = '0px';
+
+        fx.appendChild(p);
+        setTimeout(()=>p.remove(), (dur*1000)+100);
+      }
+    }
+
+    function showBouquet(){
+      bouquet.classList.add('show');
+      burstPetals(58);
+      setTimeout(()=>burstPetals(28), 220);
+      setTimeout(()=>burstPetals(18), 520);
+    }
+    function hideBouquet(){
+      bouquet.classList.remove('show');
+    }
+
+    heartBtn.addEventListener('click', ()=>{
+      if(!bouquet.classList.contains('show')) showBouquet();
+      else burstPetals(40);
+    });
+
+    closeBtn.addEventListener('click', hideBouquet);
+
+    bouquet.addEventListener('click', (e)=>{
+      if(e.target === bouquet) hideBouquet();
+    });
+  </script>
+</body>
+</html>
